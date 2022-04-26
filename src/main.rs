@@ -18,8 +18,11 @@ fn handle_connection(mut stream: TcpStream){
     let mut buffer = [0;1024];
     stream.read(&mut buffer).unwrap();
 
-    let mut file = File::open("hello.html").unwrap();
+    let get = b"GET / HTTP/1.1\r\n";
 
+    if buffer.starts_with(get) {
+
+    let mut file = File::open("hello.html").unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
 
@@ -28,5 +31,10 @@ fn handle_connection(mut stream: TcpStream){
     // println!("Request: {}", String::from_utf8_lossy(&buffer[..])); // Print Request data
     stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
+    }else {
+
+    }
+
+
 
 }
