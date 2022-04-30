@@ -10,6 +10,7 @@ pub struct ThreadPool {
 
 struct Job;
 
+
 impl ThreadPool {
     ///
     /// Create a new ThreadPool.
