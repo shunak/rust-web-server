@@ -9,7 +9,19 @@ pub struct ThreadPool {
 }
 
 // struct Job;
-type Job = Box<FnOnce() + Send + 'static>;
+// type Job = Box<dyn FnOnce() + Send + 'static>;
+
+trait FnBox {
+    fn call_box(self: Box<Self>);
+}
+impl<F: FnOnce()> FnBox for F {
+    fn call_box(self: Box<F>){
+        (*self)()
+    }
+}
+type Job = Box<dyn FnBox + Send + 'static>;
+
+
 
 impl ThreadPool {
     ///
@@ -57,7 +69,7 @@ impl Worker {
                 let job = receiver.lock().unwrap().recv().unwrap();
                 println!("Worker {} got a job; executing.", id);
 
-                (*job)();
+                job.call_box();
             }
         });
 
