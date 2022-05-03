@@ -22,8 +22,14 @@ impl<F: FnOnce()> FnBox for F {
 type Job = Box<dyn FnBox + Send + 'static>;
 
 
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        for worker in &mut self.workers {
+            println!("Shutting down worker {}", worker.id);
 
-impl ThreadPool {
+            worker.thread.join().unwrap();
+        }
+    }
     ///
     /// Create a new ThreadPool.
     /// The size is the number of threads in the pool.
