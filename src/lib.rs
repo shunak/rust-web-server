@@ -27,9 +27,13 @@ impl Drop for ThreadPool {
         for worker in &mut self.workers {
             println!("Shutting down worker {}", worker.id);
 
-            worker.thread.join().unwrap();
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
         }
     }
+}
+impl ThreadPool {
     ///
     /// Create a new ThreadPool.
     /// The size is the number of threads in the pool.
@@ -69,7 +73,7 @@ struct Worker {
 }
 
 impl Worker {
-    pub fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
+    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
         let thread = thread::spawn(move || {
             loop {
                 let job = receiver.lock().unwrap().recv().unwrap();
@@ -81,7 +85,7 @@ impl Worker {
 
         Worker{
             id,
-            thread,
+            thread: Some(thread),
         }
     }
 }
